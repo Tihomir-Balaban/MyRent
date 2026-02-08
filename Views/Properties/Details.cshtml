@@ -1,19 +1,62 @@
 ﻿@model MyRent.Models.ViewModels.PropertyDetailsPageVm
 @{
-    ViewData["Title"] = Model.Details[0].Name;
-    var d = Model.Details;
+    ViewData["Title"] = Model.Property?.Name ?? "MyRent Property";
+    var property = Model.Property;
+    var pictureLinks = Model.PictureLinks;
+
+    var gallery = pictureLinks.Count == 0 ? pictureLinks.Where(u => !string.IsNullOrWhiteSpace(u)).ToList()
+                  : pictureLinks;
 }
 
 <div class="page-header d-print-none">
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="text-secondary mb-1">
-                    <a href="/properties">← Back to list</a>
-                </div>
-                <h2 class="page-title">@d[0].Name</h2>
-                <div class="text-secondary">
-                    @(d[0].Address ?? "—") · @(d[0].CityName ?? "—") @(d[0].CityZip ?? "") · @(d[0].Country ?? "—")
+                <h2 class="page-title">@property?.Name</h2>
+                <div class="text-secondary d-flex align-items-center gap-2">
+                    <span id="property-address">
+                        @(property?.Address ?? "—"), @(property?.CityZip ?? "") @(property?.CityName ?? ""), @(property?.Country ?? "—")
+                    </span>
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="24"
+                         height="24"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         onclick="copyAddress()"
+                         class="icon icon-tabler icons-tabler-outline icon-tabler-copy">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M7 9.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667l0 -8.666"/>
+                        <path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1"/>
+                    </svg>
+                    @if (property?.GoogleMapsUrl is not null)
+                    {
+                        <a class="badge bg-blue-lt gmap-link"
+                           href="@property.GoogleMapsUrl"
+                           target="_blank"
+                           rel="noreferrer">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 width="24"
+                                 height="24"
+                                 viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round"
+                                 class="icon icon-tabler icons-tabler-outline icon-tabler-brand-google-maps">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M9.5 9.5a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0"/>
+                                <path d="M6.428 12.494l7.314 -9.252"/>
+                                <path d="M10.002 7.935l-2.937 -2.545"/>
+                                <path d="M17.693 6.593l-8.336 9.979"/>
+                                <path d="M17.591 6.376c.472 .907 .715 1.914 .709 2.935a7.263 7.263 0 0 1 -.72 3.18a19.085 19.085 0 0 1 -2.089 3c-.784 .933 -1.49 1.93 -2.11 2.98c-.314 .62 -.568 1.27 -.757 1.938c-.121 .36 -.277 .591 -.622 .591c-.315 0 -.463 -.136 -.626 -.593a10.595 10.595 0 0 0 -.779 -1.978a18.18 18.18 0 0 0 -1.423 -2.091c-.877 -1.184 -2.179 -2.535 -2.853 -4.071a7.077 7.077 0 0 1 -.621 -2.967a6.226 6.226 0 0 1 1.476 -4.055a6.25 6.25 0 0 1 4.811 -2.245a6.462 6.462 0 0 1 1.918 .284a6.255 6.255 0 0 1 3.686 3.092"/>
+                            </svg>
+                        </a>
+                    }
                 </div>
             </div>
         </div>
@@ -22,108 +65,154 @@
 
 <div class="page-body">
     <div class="container-xl">
-        <div class="row g-3">
+        <div class="row align-items-stretch g-3">
             <div class="col-12 col-lg-8">
-                <div class="card">
+                <div class="card h-100">
                     <div class="card-body">
                         <h3 class="card-title">Overview</h3>
 
                         <div class="row g-2">
                             <div class="col-6 col-md-4">
                                 <div class="text-secondary">Type</div>
-                                <div class="fw-semibold">@(d[0].ObjectType ?? "—")</div>
+                                <div class="fw-semibold">@(property?.ObjectType ?? "—")</div>
                             </div>
                             <div class="col-6 col-md-4">
-                                <div class="text-secondary">Sleeps (optimal)</div>
-                                <div class="fw-semibold">@d[0].CanSleepOptimal</div>
+                                <div class="text-secondary">Guests (optimal)</div>
+                                <div class="fw-semibold">@property?.CanSleepOptimal</div>
                             </div>
                             <div class="col-6 col-md-4">
-                                <div class="text-secondary">Sleeps (max)</div>
-                                <div class="fw-semibold">@d[0].CanSleepMax</div>
+                                <div class="text-secondary">Guests (max)</div>
+                                <div class="fw-semibold">@property?.CanSleepMax</div>
                             </div>
 
+
+                            <div class="col-6 col-md-4">
+                                <div class="text-secondary"></div>
+                                <div class="fw-semibold"></div>
+                            </div>
                             <div class="col-6 col-md-4">
                                 <div class="text-secondary">Beds</div>
-                                <div class="fw-semibold">@(d[0].Beds?.ToString() ?? "—")</div>
+                                <div class="fw-semibold">@(property?.Beds?.ToString() ?? "—")</div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="text-secondary">Bedrooms</div>
-                                <div class="fw-semibold">@(d[0].Bedrooms?.ToString() ?? "—")</div>
+                                <div class="fw-semibold">@(property?.Bedrooms?.ToString() ?? "—")</div>
+                            </div>
+                            
+                            
+                            <div class="col-6 col-md-4">
+                                <div class="text-secondary"></div>
+                                <div class="fw-semibold"></div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="text-secondary">Bathrooms</div>
-                                <div class="fw-semibold">@(d[0].Bathrooms?.ToString() ?? "—")</div>
+                                <div class="fw-semibold">@(property?.Bathrooms?.ToString() ?? "—")</div>
                             </div>
-
+                            <div class="col-6 col-md-4">
+                                <div class="text-secondary">Toilets</div>
+                                <div class="fw-semibold">@(property?.Bathrooms?.ToString() ?? "—")</div>
+                            </div>
+                            
+                            @{var isPetAllowed = property?.PetsNumber is not null and not 0;}
+                            @{var petPrice = property?.PetPrice is not null and not 0 ? property.PetPrice.ToString() : "No extra pet charge."; }
+                            <div class="col-6 col-md-4">
+                                <div class="text-secondary">Pets allowed</div>
+                                <div class="fw-semibold">@(isPetAllowed ? "Yes" : "No")</div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="text-secondary">Amount of pets allowed</div>
+                                <div class="fw-semibold">
+                                    @(isPetAllowed ? property?.PetsNumber!.ToString() : "N/A")
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="text-secondary">Price per Pets</div>
+                                <div class ="fw-semibold">
+                                    @(isPetAllowed ? petPrice : "N/A")
+                                </div>
+                            </div>
+                            
                             <div class="col-6 col-md-4">
                                 <div class="text-secondary">Check-in</div>
-                                <div class="fw-semibold">@(d[0].CheckIn ?? "—")</div>
+                                <div class="fw-semibold">@(property?.CheckIn ?? "—")</div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="text-secondary">Check-in until</div>
-                                <div class="fw-semibold">@(d[0].CheckInUntil ?? "—")</div>
+                                <div class="fw-semibold">@(property?.CheckInUntil ?? "—")</div>
                             </div>
                             <div class="col-6 col-md-4">
                                 <div class="text-secondary">Check-out</div>
-                                <div class="fw-semibold">@(d[0].CheckOut ?? "—")</div>
+                                <div class="fw-semibold">@(property?.CheckOut ?? "—")</div>
                             </div>
                         </div>
 
                         <hr />
 
-                        <h3 class="card-title">Payments & Booking</h3>
-                        <div class="d-flex flex-wrap gap-2">
-                            @if (string.Equals(d[0].InstantBooking, "Y", StringComparison.OrdinalIgnoreCase))
+                        <h3 class="card-title">Payments & Booking Options</h3>
+                        <div class="d-flex flex-nowrap flex-md-wrap gap-2 align-items-center">
+                            @if (property is not null && property.IsInstantBooking)
                             {
                                 <span class="badge bg-green-lt">Instant booking</span>
                             }
-                            @if (string.Equals(d[0].PayCard, "Y", StringComparison.OrdinalIgnoreCase))
+                            @if (property is not null && property.CanPayCard)
                             {
                                 <span class="badge bg-teal-lt">Card</span>
                             }
-                            @if (string.Equals(d[0].PayIban, "Y", StringComparison.OrdinalIgnoreCase))
+                            @if (property is not null && property.CanPayIban)
                             {
                                 <span class="badge bg-cyan-lt">IBAN</span>
                             }
-                            @if (string.Equals(d[0].PayCash, "Y", StringComparison.OrdinalIgnoreCase))
+                            @if (property is not null && property.CanPayCash)
                             {
                                 <span class="badge bg-yellow-lt">Cash</span>
                             }
-                            @if (d[0].ClassificationStar is not null)
+                            @if (property?.ClassificationStar is not null)
                             {
-                                <span class="badge bg-azure-lt">@d[0].ClassificationStar★</span>
+                                <span class="flex-grow-1"></span>
+                                <div class="star-rating ms-auto"
+                                     data-stars="@property.ClassificationStar"
+                                     aria-label="Rating @property.ClassificationStar out of 5">
+                                    <span class="stars">
+                                        <span class="stars-fill">★★★★★</span>
+                                    </span>
+                                </div>
                             }
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="col-12 col-lg-4">
-                <div class="card">
+                <div class="card h-100">
                     <div class="card-body">
                         <h3 class="card-title">Gallery</h3>
 
-                        @if (Model.PictureLinks.Count == 0)
+                        @if (gallery.Count == 0)
                         {
                             <div class="text-secondary">No pictures found.</div>
                         }
                         else
                         {
+                            
+                            var showAmount = gallery.Count <= 12 ? gallery.Count : 12;
                             <div class="row g-2">
-                                @foreach (var url in Model.PictureLinks.Take(12))
+                                @for (var i = 0; i < showAmount; i++)
                                 {
-                                    <div class="col-4">
-                                        <a href="@url" target="_blank" rel="noreferrer">
-                                            <img src="@url" class="img-fluid rounded" loading="lazy" />
+                                    var url = gallery[i];
+                                    <div class="col-6 col-md-4">
+                                        <a class="gallery-thumb"
+                                           href="#"
+                                           data-gallery-index="@i"
+                                           aria-label="Open image">
+                                            <img src="@url" alt="Gallery image" loading="lazy" />
                                         </a>
                                     </div>
                                 }
                             </div>
 
-                            @if (Model.PictureLinks.Count > 12)
+                            @if (gallery.Count > 12)
                             {
                                 <div class="mt-3 text-secondary">
-                                    Showing 12 of @Model.PictureLinks.Count images.
+                                    Showing 12 of @gallery.Count images.
                                 </div>
                             }
                         }
@@ -133,3 +222,39 @@
         </div>
     </div>
 </div>
+@if (gallery.Count > 0)
+{
+    <div class="modal modal-blur fade" id="galleryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl"  role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Gallery</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-0">
+                    <div id="galleryCarousel" class="carousel slide" data-bs-ride="false">
+                        <div class="carousel-inner">
+                            @for (var i = 0; i < gallery.Count; i++)
+                            {
+                                var url = gallery[i];
+                                <div class="carousel-item @(i == 0 ? "active" : "")">
+                                    <img src="@url" class="gallery-carousel-img" alt="Gallery image @(i + 1)" loading="lazy" />
+                                </div>
+                            }
+                        </div>
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#galleryCarousel" data-bs-slide="prev" aria-label="Previous">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        </button>
+
+                        <button class="carousel-control-next" type="button" data-bs-target="#galleryCarousel" data-bs-slide="next" aria-label="Next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

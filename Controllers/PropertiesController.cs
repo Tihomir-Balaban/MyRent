@@ -1,101 +1,122 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MyRent.Interfaces.MyRentApi;
+using MyRent.Exceptions.MyRentApi;
+using MyRent.Interfaces.Services;
+using MyRent.Models.Dtos;
+using MyRent.Models.Search;
 using MyRent.Models.ViewModels;
+using MyRent.Models.ViewModels.Shared;
 
 namespace MyRent.Controllers;
 
-public class PropertiesController(IMyRentClient client) : Controller
+[Route("/properties")]
+public sealed class PropertiesController(IMyRentClientService clientService, IPropertyListService listService) : Controller
 {
-    // GET /properties?search=&page=&pageSize=
+    // GET /properties or GET /properties?search=...
     [HttpGet("")]
     public async Task<IActionResult> Index(
         [FromQuery] string? search,
         [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 12,
+        [FromQuery] int pageSize = 3,
         CancellationToken cancellationToken = default)
     {
-        // Step 8 will replace this with PropertyListService (server-side-ready paging/search).
-        // For now: fetch all and do simple in-memory filtering + paging.
-        var all = await client.GetPropertiesAsync(cancellationToken);
-
-        var filtered = all.AsEnumerable();
-
-        if (!string.IsNullOrWhiteSpace(search))
+        try
         {
-            var s = search.Trim();
-            filtered = filtered.Where(x =>
-                (x.Name?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.CityName?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.Country?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.ObjectType?.Contains(s, StringComparison.OrdinalIgnoreCase) ?? false));
-        }
+            string? searchCity = null;
+            string? searchCountry = null;
+            string? searchText = null;
 
-        var totalCount = filtered.Count();
-        page = page < 1 ? 1 : page;
-        pageSize = pageSize is < 6 or > 48 ? 12 : pageSize;
-
-        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-        if (totalPages == 0) totalPages = 1;
-        if (page > totalPages) page = totalPages;
-
-        var items = filtered
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(x => new PropertyListItemVm
+            if (!string.IsNullOrWhiteSpace(search))
             {
-                IdHash = x.IdHash,
-                Name = x.Name,
-                PictureMainUrl = x.PictureMainUrl,
-                ObjectType = x.ObjectType,
-                CityName = x.CityName,
-                Country = x.Country,
-                CanSleepOptimal = x.CanSleepOptimal,
-                CanSleepMax = x.CanSleepMax,
-                ClassificationStar = x.ClassificationStar,
-                InstantBooking = x.InstantBooking,
-                PayCard = x.PayCard,
-                PayIban = x.PayIban,
-                PayCash = x.PayCash
-            })
-            .ToList();
+                if (search.StartsWith("city:", StringComparison.OrdinalIgnoreCase))
+                {
+                    searchCity = search["city:".Length..].Trim();
+                }
+                else if (search.StartsWith("country:", StringComparison.OrdinalIgnoreCase))
+                {
+                    searchCountry = search["country:".Length..].Trim();
+                }
+                else
+                {
+                    searchText = search.Trim();
+                }
+            }
+            
+            var result = await listService.GetAsync(new PropertyListQuery
+            {
+                SearchTerm = searchText,
+                Page = page,
+                PageSize = pageSize,
+                SearchCity = searchCity,
+                SearchCountry = searchCountry,
+            }, cancellationToken);
 
-        var vm = new PropertyListPageVm
+            var vm = new PropertyListPageVm
+            {
+                Items = result.Items,
+                Search = search,
+                Page = result.Page,
+                PageSize = result.PageSize,
+                TotalCount = result.TotalCount,
+                TotalPages = result.TotalPages,
+                Message = result.Message
+            };
+
+            return View(vm);
+        }
+        catch (MyRentApiException ex)
         {
-            Items = items,
-            Search = search,
-            Page = page,
-            PageSize = pageSize,
-            TotalCount = totalCount,
-            TotalPages = totalPages
-        };
-
-        return View(vm);
+            return View("~/Views/Shared/ErrorFriendly.cshtml", new ErrorVm
+            {
+                Title = "MyRent API error",
+                Message = "Failed to load properties from the external API.",
+                StatusCode = (int)ex.StatusCode
+            });
+        }
     }
 
     // GET /properties/{idHash}
     [HttpGet("{idHash}")]
     public async Task<IActionResult> Details([FromRoute] string idHash, CancellationToken cancellationToken)
     {
-        // Parallel fetch
-        var detailsTask = client.GetPropertyDetailsAsync(idHash, cancellationToken);
-        var picturesTask = client.GetPicturesAsync(idHash, cancellationToken);
-
         try
         {
+            var detailsTask = clientService.GetPropertyDetailsAsync(idHash, cancellationToken);
+            var picturesTask = clientService.GetPicturesAsync(idHash, cancellationToken);
+
             await Task.WhenAll(detailsTask, picturesTask);
-        }
-        catch
-        {
-            // let MVC error page show for now; later we can render a friendly error view
-            throw;
-        }
 
-        var vm = new PropertyDetailsPageVm
-        {
-            Details = detailsTask.Result,
-            PictureLinks = picturesTask.Result?.Select(p => p.PictureLink).ToList()
-        };
+            var vm = new PropertyDetailsPageVm
+            {
+                Property = detailsTask.Result,
+                PictureLinks = picturesTask.Result?.Select(p => p.PictureLink).ToList() ?? new List<string>()
+            };
+            
+            // NOTE:
+            // Due to the fact that the api doesn't have a property with more than 12 pictures, if
+            // you want to mock this comment the PropertyDetailsPageVm reference type instantiation and
+            // uncomment the following commented lines.
 
-        return View(vm);
+            // List<string> longerPictureList = new List<string>();
+            //
+            // for (int i = 0; i < 3; i++)
+            //     longerPictureList.AddRange(picturesTask.Result?.Select(p => p.PictureLink).ToList());
+            //
+            // var vm = new PropertyDetailsPageVm
+            // {
+            //     Property = detailsTask.Result,
+            //     PictureLinks = longerPictureList
+            // };
+
+            return View(vm);
+        }
+        catch (MyRentApiException ex)
+        {
+            return View("~/Views/Shared/ErrorFriendly.cshtml", new ErrorVm
+            {
+                Title = "MyRent API error",
+                Message = "Failed to load property details from the external API.",
+                StatusCode = (int)ex.StatusCode
+            });
+        }
     }
 }

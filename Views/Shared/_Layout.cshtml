@@ -1,52 +1,99 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"] - MyRent</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <title>MyRent - @ViewData["Title"]</title>
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" asp-append-version="true">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/MyRent.styles.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="@("https://unpkg.com/\"@tabler/core@latest/dist/css/tabler.min.cs")">
-    <script src="@("https://unpkg.com/@tabler/core@latest/dist/js/tabler.min.js")"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/@@tabler/core@latest/dist/css/tabler.min.css">
+    <script>
+        (function () {
+            const storageKey = "theme";
+            const saved = localStorage.getItem(storageKey);
+            const theme = (saved === "dark" || saved === "light") ? saved : "light";
+
+            document.documentElement.setAttribute("data-bs-theme", theme);
+            document.documentElement.classList.toggle("theme-dark", theme === "dark");
+
+            if (!saved) localStorage.setItem(storageKey, theme);
+        })();
+    </script>
 
 </head>
 <body>
-<header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container-fluid">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MyRent</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                    </li>
-                </ul>
+    <div id="page-loading">
+        <div class="spinner-border" role="status" aria-label="Loading"></div>
+    </div>
+    <header class="navbar navbar-expand-md d-print-none">
+        <div class="container-xl">
+            <a class="block" href="/properties" aria-label="Home page">
+
+                <svg width="150"
+                     id="h_enK3kE6X9Wp1"
+                     xmlns="http://www.w3.org/2000/svg"
+                     xmlns:xlink="http://www.w3.org/1999/xlink"
+                     viewBox="0 0 370 150"
+                     shape-rendering="geometricPrecision"
+                     text-rendering="geometricPrecision"
+                     project-id="2b98d5d941db4f92920bccf14d2adcff"
+                     export-id="1888f7cbb4714fc3a21f3e652bc54dff"
+                     cached="false">
+                    <g transform="matrix(.8 0 0 0.8 0.425671 30.385651)"><g>
+                            <path d="M17.83,45.29v44.64h-17.83v-41.07C0,28.93,10.03,19.02,29.98,19.02c8.98,0,15.85,1.98,20.87,5.95c5.01-3.83,11.88-5.68,20.86-5.68c19.94,0,29.85,9.9,29.72,29.84v41.08h-9.11c-5.81-.39-8.72-3.18-8.72-8.72v-35.92c-.4-7.27-4.36-10.83-12.15-10.83s-11.75,3.57-11.89,10.83v44.37h-17.69v-44.64c-.39-7.26-4.36-10.83-12.15-10.83s-11.75,3.56-11.89,10.83v-.01Z" fill="#5fc5d0"></path>
+                            <g id="h_enK3kE6X9Wp5" transform="translate(0 0)">
+                                <path d="M165.21,32.42c-5.12-7.78-12.99-13.3-26.27-13.41-16.35-.13-28.29,9.31-30.17,23.04-1.47,10.73,2.73,23.75,8.52,32.92c9.43,14.97,9.06,17.59,8.6,24.41-1.23,18.27-20.8,28.92-20.8,28.92c17.79-2.84,28.47-14.19,33.4-19.51c19.55-21.06,27.05-39.08,29.75-50.61c2.14-9.15,1.57-18.77-3.03-25.77v.01ZM139.79,82.93l-1.53,1.18-1.45-1.27c-8.72-7.6-18.45-23.63-18.42-33.7.03-11.84,8.41-20.1,20.37-20.1s20.38,8.73,20.38,22.23c0,7.78-8.45,23.3-19.34,31.66h-.01Z" fill="#5fc5d0"></path>
+                                <path d="M138.81,29.04c-11.96,0-20.34,8.27-20.38,20.1c0,1.31.16,2.72.46,4.2-.24-1.26-.37-2.47-.37-3.59.03-11.06,7.57-18.36,18.63-18.36c11.7,0,19.03,8.19,18.64,20.55-.25,8.06-8.22,22.49-19.04,30.8.03.03.07.06.1.09l1.79,1.86l1.53-1.18c10.89-8.36,19.57-22.81,20.16-31.97.88-13.71-9.14-22.51-21.52-22.51v.01Z" fill="#2b5b65"></path>
+                            </g>
+                        </g>
+                        <g>
+                            <path d="M285.87,91.52c-21.13-.66-31.7-12.94-31.7-36.71s10.7-35.66,31.96-35.79c22.19,0,32.62,13.6,31.3,40.94h-45.17c.67,10.7,5.29,16.11,13.87,16.11c4.09,0,7.93-1.71,11.35-5.02c1.59-1.72,3.58-2.51,5.95-2.51h12.94c-3.83,14.79-13.34,22.97-30.51,22.97l.01.01ZM272.53,47.41h26.28c-1.05-9.24-5.42-14-12.94-14s-12.02,4.76-13.33,14h-.01Z" fill="#2b5b65"></path><path d="M376.2,89.93c-5.81-.4-8.71-3.17-8.71-8.72v-35.92c-.4-7.26-4.36-10.83-12.15-10.83s-11.76,3.56-11.89,10.83v44.64h-17.83v-41.07c0-19.94,10.03-29.84,29.98-29.84s29.72,9.9,29.58,29.84v41.07h-8.98Z" fill="#2b5b65"></path><path d="M419.6,32.49h-6.1v38.7c0,2.91,1.72,4.49,5.15,4.49h9.66v13.34c-5.68.53-16.13.53-22.74-.14-6.6-.66-9.78-4.75-9.64-12.54v-76.34h9.11c4.62,0,8.45,4.23,8.45,8.85v11.1h14.81v3.83c0,5.01-3.83,8.71-8.71,8.71h.01Z" fill="#2b5b65"></path><path d="M180.49,10.67c0-6.62,3.95-9.64,11.5-9.64h23.11c19.51,0,30.32,13.24,30.32,27.06c0,8.83-4.3,17.77-13.71,23.81l10.27,20.06c3.34,7.4,7.29,13.62,10.22,19.55h-15.6c-3.84,0-6.43-4.41-6.43-4.41L214.76,56.66h-15.69v34.85h-18.58v-80.84Zm18.59,8.95v18.58h16.84c6.5,0,10.45-5.23,10.45-10.1c0-4.3-3.14-8.48-10.45-8.48h-16.84Z" fill="#2b5b65"></path>
+                        </g>
+                        <path id="h_enK3kE6X9Wp14" d="M146.71,52.57c-1.31,4.49-6.02,7.06-10.52,5.74-4.49-1.32-7.05-6.02-5.73-10.51s6.02-7.06,10.51-5.74c4.48,1.32,7.06,6.03,5.74,10.52v-.01Z" transform="matrix(2.1 0 0 2.1 -291.026816 16.828358)" fill="#2b5b65" opacity="0"></path>
+                        <path id="h_enK3kE6X9Wp15" d="M146.71,52.57c-1.31,4.49-6.02,7.06-10.52,5.74-4.49-1.32-7.05-6.02-5.73-10.51s6.02-7.06,10.51-5.74c4.48,1.32,7.06,6.03,5.74,10.52v-.01Z" transform="translate(-74.241234 -53.39651)" opacity="1" fill="#2b5b65"></path>
+                    </g>
+                </svg>
+
+                <img width="135" height="40" src="https://my-rents.com/themes/myrent/assets/images/logo-myrent.svg" alt="MyRent logo" style="display: none;">
+            </a>
+
+            <div class="navbar-nav flex-row order-md-last">
+                <div class="nav-item">
+                    <button type="button"
+                            class="btn btn-icon"
+                            onclick="toggleTheme()"
+                            id="theme-toggle"
+                            aria-label="Toggle dark mode">
+                    </button>
+                </div>
             </div>
         </div>
-    </nav>
-</header>
-<div class="container">
-    <main role="main" class="pb-3">
-        @RenderBody()
-    </main>
-</div>
-
-<footer class="border-top footer text-muted">
-    <div class="container">
-        &copy; 2026 - MyRent - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    </header>
+    <div class="page">
+        <div class="page-wrapper">
+            <div class="page-body">
+                <div class="container-xl">
+                    <main role="main" class="pb-3">
+                        @RenderBody()
+                    </main>
+                </div>
+            </div>
+        </div>
     </div>
-</footer>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
-@await RenderSectionAsync("Scripts", required: false)
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"></script>
+    <script>
+        if (!window.jQuery) {
+            document.write('<script src="/lib/jquery/dist/jquery.min.js"><\/script>');
+        }
+    </script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/@@tabler/core@latest/dist/js/tabler.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
 </body>
 </html>

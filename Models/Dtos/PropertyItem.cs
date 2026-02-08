@@ -2,7 +2,7 @@
 
 namespace MyRent.Models.Dtos;
 
-public sealed class PropertyListItem
+public sealed class PropertyItem
 {
     [JsonPropertyName("id_hash")]
     public string IdHash { get; init; } = string.Empty;
@@ -90,4 +90,25 @@ public sealed class PropertyListItem
 
     [JsonPropertyName("classification_star")]
     public int? ClassificationStar { get; init; }
+    
+    [JsonIgnore]
+    public bool IsInstantBooking => string.Equals(InstantBooking, "Y", StringComparison.OrdinalIgnoreCase);
+
+    [JsonIgnore]
+    public bool CanPayCard => string.Equals(PayCard, "Y", StringComparison.OrdinalIgnoreCase);
+
+    [JsonIgnore]
+    public bool CanPayIban => string.Equals(PayIban, "Y", StringComparison.OrdinalIgnoreCase);
+
+    [JsonIgnore]
+    public bool CanPayCash => string.Equals(PayCash, "Y", StringComparison.OrdinalIgnoreCase);
+    
+    [JsonIgnore]
+    public bool IsPetsAllowed => PetsNumber is > 0;
+    
+    [JsonIgnore]
+    public string? GoogleMapsUrl =>
+        !string.IsNullOrWhiteSpace(Latitude) && !string.IsNullOrWhiteSpace(Longitude)
+            ? $"https://www.google.com/maps?q={Latitude},{Longitude}"
+            : null;
 }

@@ -14,10 +14,12 @@ public sealed class PropertyListItemVm
     public int CanSleepOptimal { get; init; }
     public int CanSleepMax { get; init; }
 
-    public int? ClassificationStar { get; init; }
+    public int?ClassificationStar { get; init; }
 
-    public string? InstantBooking { get; init; }
-    public string? PayCard { get; init; }
-    public string? PayIban { get; init; }
-    public string? PayCash { get; init; }
+    public bool InstantBooking { get; init; }
+    public bool PayCard { get; init; }
+    public bool PayIban { get; init; }
+    public bool PayCash { get; init; }
+    
+    public bool IsPetsAllowed { get; init; }
 }

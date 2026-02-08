@@ -22,7 +22,41 @@
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
                     </span>
-                    <input name="search" value="@search" class="form-control" placeholder="Search by name, city, country, type…" />
+                    <div class="position-relative">
+                        <input
+                            id="search-input"
+                            name="search"
+                            value="@search"
+                            class="form-control"
+                            placeholder="Search by name, city, country, type…"
+                            autocomplete="off" />
+                            <button
+                                type="button"
+                                id="search-clear"
+                                class="btn btn-icon btn-sm position-absolute top-50 end-0 translate-middle-y me-3 d-none"
+                                aria-label="Clear search">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     width="24"
+                                     height="24"
+                                     viewBox="0 0 24 24"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="2"
+                                     stroke-linecap="round"
+                                     stroke-linejoin="round"
+                                     class="icon icon-tabler icons-tabler-outline icon-tabler-xbox-x">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                    <path d="M12 21a9 9 0 0 0 9 -9a9 9 0 0 0 -9 -9a9 9 0 0 0 -9 9a9 9 0 0 0 9 9"/>
+                                    <path d="M9 8l6 8"/>
+                                    <path d="M15 8l-6 8"/>
+                                </svg>
+                            </button>
+                        <div
+                            id="search-suggestions"
+                            class="dropdown-menu show"
+                            style="display:none; width:100%;">
+                        </div>
+                    </div>
                     <input type="hidden" name="page" value="1" />
                     <input type="hidden" name="pageSize" value="@Model.PageSize" />
                 </form>
@@ -34,10 +68,10 @@
                     <input type="hidden" name="page" value="@Model.Page" />
                     <select name="pageSize" class="form-select w-auto" onchange="this.form.submit()">
                         @{
-                            int[] sizes = { 6, 12, 24, 48 };
+                            int[] sizes = { 3, 6, 12, 24 };
                             foreach (var s in sizes)
                             {
-                                <option value="@s" selected="@(Model.PageSize == s)">@s / page</option>
+                                <option value="@s" selected="@(Model.PageSize == s)">Show @s</option>
                             }
                         }
                     </select>
@@ -59,52 +93,73 @@
         else
         {
             <div class="row row-cards">
-                @foreach (var p in Model.Items)
+                @foreach (var property in Model.Items)
                 {
                     <div class="col-12 col-md-6 col-lg-4">
-                        <div class="card">
-                            @if (!string.IsNullOrWhiteSpace(p.PictureMainUrl))
+                        <div class="card h-100">
+                            @if (!string.IsNullOrWhiteSpace(property.PictureMainUrl))
                             {
-                                <img class="card-img-top" src="@p.PictureMainUrl" alt="@p.Name" loading="lazy" />
+                                <a href="/properties/@property.IdHash">
+                                    <div class="property-card-media">
+                                        <img class="property-card-img"
+                                             src="@property.PictureMainUrl"
+                                             alt="@property.Name"
+                                             loading="lazy" />
+                                    </div>
+                                </a>
                             }
                             <div class="card-body">
                                 <div class="d-flex align-items-start justify-content-between gap-2">
                                     <div>
-                                        <h3 class="card-title mb-1">@p.Name</h3>
+                                        <h3 class="card-title mb-1">@property.Name</h3>
                                         <div class="text-secondary">
-                                            @(p.ObjectType ?? "—") · @(p.CityName ?? "—"), @(p.Country ?? "—")
+                                            @(property.ObjectType ?? "—") · @(property.CityName ?? "—"), @(property.Country ?? "—")
                                         </div>
                                     </div>
-                                    @if (p.ClassificationStar is not null)
+                                    @if (property.ClassificationStar is not null)
                                     {
-                                        <span class="badge bg-azure-lt">@p.ClassificationStar★</span>
+                                        <div class="star-rating"
+                                             data-stars="@property.ClassificationStar"
+                                             aria-label="Rating @property.ClassificationStar out of 5">
+                                            <span class="stars">
+                                                <span class="stars-fill">★★★★★</span>
+                                            </span>
+                                        </div>
                                     }
                                 </div>
 
                                 <div class="mt-3 d-flex flex-wrap gap-2">
-                                    <span class="badge bg-blue-lt">Optimal: @p.CanSleepOptimal</span>
-                                    <span class="badge bg-indigo-lt">Max: @p.CanSleepMax</span>
+                                    <span class="badge bg-blue-lt">Optimal Guests: @property.CanSleepOptimal</span>
+                                    <span class="badge bg-indigo-lt">Max Guests: @property.CanSleepMax</span>
 
-                                    @if (string.Equals(p.InstantBooking, "Y", StringComparison.OrdinalIgnoreCase))
+                                    @if (property.InstantBooking)
                                     {
                                         <span class="badge bg-green-lt">Instant booking</span>
                                     }
-                                    @if (string.Equals(p.PayCard, "Y", StringComparison.OrdinalIgnoreCase))
+                                    @if (property.PayCard)
                                     {
                                         <span class="badge bg-teal-lt">Card</span>
                                     }
-                                    @if (string.Equals(p.PayIban, "Y", StringComparison.OrdinalIgnoreCase))
+                                    @if (property.PayIban)
                                     {
                                         <span class="badge bg-cyan-lt">IBAN</span>
                                     }
-                                    @if (string.Equals(p.PayCash, "Y", StringComparison.OrdinalIgnoreCase))
+                                    @if (property.PayCash)
                                     {
                                         <span class="badge bg-yellow-lt">Cash</span>
+                                    }
+                                    @if (property.IsPetsAllowed)
+                                    {
+                                        <span class="badge bg-green-lt">Pet Friendly</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-red-lt">No Pets</span>
                                     }
                                 </div>
 
                                 <div class="mt-3">
-                                    <a class="btn btn-primary w-100" href="/properties/@p.IdHash">Details</a>
+                                    <a class="btn btn-details w-100" href="/properties/@property.IdHash">Details</a>
                                 </div>
                             </div>
                         </div>
@@ -135,7 +190,9 @@
                             {
                                 var active = i == Model.Page ? "active" : "";
                                 <li class="page-item @active">
-                                    <a class="page-link" href="@Url(i)">@i</a>
+                                    
+                                    @{ var background = i == Model.Page ? "bg-indigo" : "";}
+                                    <a class="page-link @background" href="@Url(i)">@i</a>
                                 </li>
                             }
                         }
@@ -149,3 +206,26 @@
         }
     </div>
 </div>
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            showToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Message)), "warning");
+        });
+    </script>
+}
+@section Scripts {
+    <script>
+    $(function () {
+
+        $(".property-card-img").hover(
+            function () {
+                $(this).addClass("is-hovered");
+            },
+            function () {
+                $(this).removeClass("is-hovered");
+            }
+        );
+    });
+</script>
+}

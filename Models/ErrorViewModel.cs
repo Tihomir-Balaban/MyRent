@@ -1,6 +1,6 @@
 namespace MyRent.Models;
 
-public class ErrorViewModel
+public sealed class ErrorViewModel
 {
     public string? RequestId { get; set; }
 

@@ -10,4 +10,5 @@ public sealed class PropertyListPageVm
 
     public int TotalCount { get; init; }
     public int TotalPages { get; init; }
+    public string? Message { get; init; } = null;
 }

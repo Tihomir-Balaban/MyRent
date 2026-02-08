@@ -16,8 +16,8 @@ This project is a simple ASP.NET Core MVC application that consumes the **MyRent
 ## Prerequisites
 
 - .NET 8 SDK
-- JetBrains Rider / Visual Studio / VS Code
-- Valid **MyRent API Guid & Token**
+- Visual Studio / JetBrains Rider / VS Code
+- Valid **MyRent API, Guid & Token**
 
 ---
 

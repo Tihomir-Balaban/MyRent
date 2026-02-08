@@ -1,0 +1,19 @@
+﻿@model MyRent.Models.ViewModels.Shared.ErrorVm
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-title">@Model.Title</h4>
+            <div class="text-secondary">@Model.Message</div>
+            @if (Model.StatusCode is not null)
+            {
+                <div class="mt-2 small text-secondary">Status: @Model.StatusCode</div>
+            }
+        </div>
+
+        <a class="btn btn-primary" href="/properties">Back to properties</a>
+    </div>
+</div>

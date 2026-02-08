@@ -1,16 +1,8 @@
-using DotNetEnv;
 using MyRent.Config;
-using MyRent.Interfaces.MyRentApi;
-using MyRent.MyRentApi;
-
-try
-{
-    Env.Load();
-}
-catch(Exception ex)
-{
-    Console.WriteLine($".env not loaded: {ex.Message}");
-}
+using MyRent.Interfaces.Services;
+using MyRent.Interfaces.Services.Shared;
+using MyRent.Services;
+using MyRent.Services.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +16,14 @@ builder.Services
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddHttpClient<IMyRentClient, MyRentClient>((sp, client) =>
+builder.Services.AddMemoryCache();
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddScoped<IPropertyListService, PropertyListService>();
+builder.Services.AddScoped<IMemoryCacheService, MemoryCacheService>();
+builder.Services.AddHttpClient<IMyRentClientService, MyRentClientService>((sp, client) =>
 {
+
     var options = sp
         .GetRequiredService<Microsoft.Extensions.Options.IOptions<MyRentApiOptions>>()
         .Value;
