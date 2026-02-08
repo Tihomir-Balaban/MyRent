@@ -8,7 +8,7 @@ This project is a simple ASP.NET Core MVC application that consumes the **MyRent
 
 - **.NET 8 (LTS)**
 - **ASP.NET Core MVC**
-- **HttpClient + Options pattern**
+- **HttpClient**
 - **Tabler UI**
 - **Razor Views**
 ---
