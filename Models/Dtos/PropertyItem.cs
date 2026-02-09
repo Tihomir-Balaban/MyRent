@@ -29,10 +29,10 @@ public sealed class PropertyItem
     public string? ObjectType { get; init; }
 
     [JsonPropertyName("latitude")]
-    public string? Latitude { get; init; }
+    public float? Latitude { get; init; }
 
     [JsonPropertyName("longitude")]
-    public string? Longitude { get; init; }
+    public float? Longitude { get; init; }
 
     [JsonPropertyName("adress")]
     public string? Address { get; init; }
@@ -108,7 +108,7 @@ public sealed class PropertyItem
     
     [JsonIgnore]
     public string? GoogleMapsUrl =>
-        !string.IsNullOrWhiteSpace(Latitude) && !string.IsNullOrWhiteSpace(Longitude)
+        Latitude is not null && Longitude is not null
             ? $"https://www.google.com/maps?q={Latitude},{Longitude}"
             : null;
 }
